@@ -1,4 +1,0 @@
-PixelMaker
-==========
-
-Pixellize an image
