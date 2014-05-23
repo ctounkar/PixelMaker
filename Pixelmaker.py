@@ -31,60 +31,47 @@ def fgcd(vala,valb):
 
 # ================================================================================
 def pixellize(my_img, step, option = 0): 
-    img = my_img.convert('RGB')
+    width = my_img.size[0]
+    height = my_img.size[1]
+    draw = ImageDraw.Draw(my_img)
     
-    width = img.size[0]
-    height = img.size[1]
-    
-    my_count = step ** 2
-    
-    new_img = Image.new('RGB', (width,height))
-    draw = ImageDraw.Draw(new_img)
-    
-    if option not in [0,1,2,3]:
+    if option not in [0,1,2,3,4]:
         option = 0 # while waiting for a proper error handling
     
-    if option == 1:
-        factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-    
-    pxl_avg = [0,0,0]
-    
-    for i in range(0,height,step): # row by row
-        if option == 2:
-            factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                     
-        for j in range(0,width,step): # column by column
-            if option == 3:
-                factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-            
-            # Iterate through the block to find color average
-            for k in range(i,i+step,1): 
-                for p in range(j,j+step,1):
-                    pxl_r, pxl_g, pxl_b = img.getpixel((p,k))
-                    pxl_avg [0] += pxl_r
-                    pxl_avg [1] += pxl_g
-                    pxl_avg [2] += pxl_b
-            
-            if option == 0:
-                new_pxl_r = pxl_avg[0]//my_count
-                new_pxl_g = pxl_avg[1]//my_count
-                new_pxl_b = pxl_avg[2]//my_count
-            else:
-                new_pxl_r = ((pxl_avg[0]//my_count) + factor[0]) // 2
-                new_pxl_g = ((pxl_avg[1]//my_count) + factor[1]) // 2
-                new_pxl_b = ((pxl_avg[2]//my_count) + factor[2]) // 2
+    if option == 0:
+        factor = [0,0,0]
+        for i in range(0,height,step): # row by row        
+            for j in range(0,width,step):
+                my_block = (i,j,i+step,j+step)
+                my_pixel = color_pixel(my_block, my_img, factor)
+                draw.rectangle(my_block, fill = my_pixel)
                 
-            # my block = 1 pixel
-            my_pixel = (new_pxl_r, new_pxl_g, new_pxl_b)
-            #print(my_pixel)
-            my_block = [(j,i),(j+step,i+step)]
-            draw.rectangle(my_block, fill = my_pixel)
-            
-            pxl_avg = [0,0,0]
-            
+        
+    elif option == 1:
+        factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
+        for i in range(0,height,step): # row by row        
+            for j in range(0,width,step):
+                my_block = (i,j,i+step,j+step)
+                my_pixel = color_pixel(my_block, my_img, factor)
+                draw.rectangle(my_block, fill = my_pixel)
+    
+    elif option == 2:
+        for i in range(0,height,step): # row by row        
+            factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
+            for j in range(0,width,step):
+                my_block = (i,j,i+step,j+step)
+                my_pixel = color_pixel(my_block, my_img, factor)
+                draw.rectangle(my_block, fill = my_pixel)
+                             
+    elif option == 3:
+        for j in range(0,width,step): # column by column
+            factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
+            for i in range(0,height,step):
+                my_block = (i,j,i+step,j+step)
+                my_pixel = color_pixel(my_block, my_img, factor)
+                draw.rectangle(my_block, fill = my_pixel)
+                
     del draw
-       
-    return new_img
 
 # ================================================================================
 def pixellize_multi(img,option=0):
@@ -107,12 +94,35 @@ def pixellize_multi(img,option=0):
 
 
 # ================================================================================
+def choose_factor(a,b):
+    ## Ask user to provide a pixellization factor
+    list_factor = fgcd(a,b)
+    while len(list_factor) < 2:
+        a -= 1
+        list_factor = fgcd(a,b)
+        
+    factor_in = False
+    
+    while not factor_in:
+        print('Veuillez choisir la taille de votre pixel : ', str(list_factor))
+        try:
+            factor = int(input())
+            factor_in = (factor in list_factor)
+            if not factor_in:
+                print("cette valeur n'est pas dans la liste")
+        except ValueError:
+            print("Ceci n'est pas une entrée valide")
+        pass          
+    
+    return factor
+        
+
+# ================================================================================
 def color_pixel(square, img, color):
     i = 0
     j = 0
     count = 0
     pxl_avg = [0,0,0]
-    
     for i in range(square[0],square[2],1): # row by row 
         for j in range(square[1],square[3],1): # column by column
             pxl_r, pxl_g, pxl_b = img.getpixel((i,j))

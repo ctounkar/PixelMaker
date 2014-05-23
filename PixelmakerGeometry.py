@@ -21,3 +21,17 @@ def square_range(point,corners):
     
     return in_range
 
+#def ellipse_range(point, corners):
+#    return in_range
+
+#def losange_range(point, corners):
+#    return in_range
+
+#def rectangle_range(point, corners):
+#    return in_range
+
+#def triangle_range(point, corners):
+#    return in_range
+
+#def trapeze_range(point, corners):
+#    return in_range
