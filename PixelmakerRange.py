@@ -1,6 +1,5 @@
 import random
 from PIL import ImageDraw
-from Pixelmaker.Pixelmaker import color_pixel
 from Pixelmaker.PixelmakerLines import inclined_range, between_bars
 from Pixelmaker.PixelmakerGeometry import circle_range, square_range
 
@@ -24,7 +23,24 @@ def squares_in_range(img, mask):
                     botx = min(img.size[0], (i + 1)*step)
                     boty = min(img.size[1], (j + 1)*step)
                     my_block = [(topx, topy), (botx, boty)]
+    #------------------------------------------------------------------------------
+    if mask['type'] == 'ring':
+        step = mask['step']
+        xstep = img.size[0]//step
+        ystep = img.size[1]//step
+        for i in range(0,xstep,1):
+            for j in range(0,ystep,1):
+                test_inner = circle_range(((i+1/2)*step, (j+1/2)*step), mask['center'], mask['radius'],'out')
+                test_outer = circle_range(((i+1/2)*step, (j+1/2)*step), mask['center'], mask['radius'] + mask['width'],'in')
+                if test_inner and test_outer:
+                    topx = max(0, i*step)
+                    topy = max(0, j*step)
+                    botx = min(img.size[0], (i + 1)*step)
+                    boty = min(img.size[1], (j + 1)*step)
+                    my_block = [(topx, topy), (botx, boty)]
                     my_area.append(my_block)
+                    my_area.append(my_block)
+    
     #------------------------------------------------------------------------------
     if mask['type'] == 'bande':
         step = mask['step']
@@ -140,65 +156,3 @@ def squares_in_range(img, mask):
     return my_area
 
 
-# ================================================================================
-# functions ---------------
-# ================================================================================
-def colors_in_range(img, mask, option = 0):
-    draw = ImageDraw.Draw(img)
-    zone = squares_in_range(img, mask) 
-    
-    if option == 0: # 1 color for all zone
-        color = [0,0,0]
-        for elt in zone:
-            my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-            draw.rectangle(elt, fill = my_pixel)
-    else:
-        if mask['type'] == 'gradient square':
-            for upelt in zone:
-                color = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                for elt in upelt:
-                    my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                    draw.rectangle(elt, fill = my_pixel)
-                        
-        else:
-            if option == 1: # 1 color for all zone
-                color = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                for elt in zone:
-                    my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                    draw.rectangle(elt, fill = my_pixel)
-    
-            elif option == 2: #1 color by vertical strip
-                column = {}
-                color = [0,0,0]
-                for elt in zone:
-                    if elt[0][0] in column.keys():
-                        color = column[elt[0][0]]
-                    else:
-                        color = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                        column[elt[0][0]] = color
-                        
-                    my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                    draw.rectangle(elt, fill = my_pixel)
-                                
-            elif option == 3: #1 color by horizontal strip
-                row = {}
-                color = [0,0,0]
-                for elt in zone:
-                    if elt[0][1] in row.keys():
-                        color = row[elt[0][1]]
-                    else:
-                        color = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                        row[elt[0][1]] = color
-                        
-                    my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                    draw.rectangle(elt, fill = my_pixel)
-                                
-            elif option == 4: #1 color by pixel
-                for elt in zone:
-                    color = [random.randrange(255),random.randrange(255),random.randrange(255)]
-                    my_pixel = color_pixel((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                    draw.rectangle(elt, fill = my_pixel)            
-    
-    del draw
-
-    #return img

@@ -117,27 +117,28 @@ def choose_factor(a,b):
     return factor
         
 
-# ================================================================================
-def color_pixel(square, img, color):
-    i = 0
-    j = 0
-    count = 0
-    pxl_avg = [0,0,0]
-    for i in range(square[0],square[2],1): # row by row 
-        for j in range(square[1],square[3],1): # column by column
-            pxl_r, pxl_g, pxl_b = img.getpixel((i,j))
-            pxl_avg [0] += pxl_r
-            pxl_avg [1] += pxl_g
-            pxl_avg [2] += pxl_b
-            count += 1
-
-    if color != [0,0,0]:            
-        new_pxl_r = ((pxl_avg[0]//count) + color[0]) // 2
-        new_pxl_g = ((pxl_avg[1]//count) + color[1]) // 2
-        new_pxl_b = ((pxl_avg[2]//count) + color[2]) // 2
-    else:
-        new_pxl_r = pxl_avg[0]//count
-        new_pxl_g = pxl_avg[1]//count
-        new_pxl_b = pxl_avg[2]//count
+#================================================================================
+def inputint(text, list_choice = None):
+    test = False
     
-    return (new_pxl_r, new_pxl_g, new_pxl_b)
+    while not test:
+        if list_choice:
+            print(text,str(list_choice))
+            try:
+                ma_valeur = int(input())
+                test = (ma_valeur in list_choice)
+                if not test:
+                    print("cette valeur n'est pas dans la liste")
+            except ValueError:
+                print("Ceci n'est pas une entrée valide")
+            pass
+        else:
+            print(text)
+            try:
+                ma_valeur = int(input())
+                test = True
+            except ValueError:
+                print("Ceci n'est pas une entrée valide")
+            pass
+        
+    return ma_valeur
