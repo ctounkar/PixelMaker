@@ -1,144 +1,75 @@
-import random
-from PIL import Image, ImageDraw
-from fractions import gcd
-from functools import reduce
+from PIL import Image
+from Pixelmaker.PixelmakerFunctions import *
+from Pixelmaker.PixelmakerColor import colors_in_range
+from Pixelmaker.PixelmakerRange import *
 
-# List of basic functions
-def iter_frames(img):
-    try:
-        i= 0
-        while 1:
-            img.seek(i)
-            imframe = img.copy()
-            if i == 0: 
-                palette = imframe.getpalette()
-            else:
-                imframe.putpalette(palette)
-            yield imframe
-            i += 1
-    except EOFError:
-        pass
-    
-# ================================================================================  
-def fgcd(vala,valb):
-    val = gcd(vala,valb)
-    factors = reduce(list.__add__, ([i, val//i] for i in range(1, int(val**0.5) + 1) if val % i == 0))
-    factors.sort()
-    if len(factors) > 1:
-        del factors[0] # first factor is always 1
-    
-    return factors
+class PixelMaker:
 
-# ================================================================================
-def pixellize(my_img, step, option = 0): 
-    width = my_img.size[0]
-    height = my_img.size[1]
-    draw = ImageDraw.Draw(my_img)
-    
-    if option not in [0,1,2,3,4]:
-        option = 0 # while waiting for a proper error handling
-    
-    if option == 0:
-        factor = [0,0,0]
-        for i in range(0,height,step): # row by row        
-            for j in range(0,width,step):
-                my_block = (i,j,i+step,j+step)
-                my_pixel = color_pixel(my_block, my_img, factor)
-                draw.rectangle(my_block, fill = my_pixel)
-                
-        
-    elif option == 1:
-        factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-        for i in range(0,height,step): # row by row        
-            for j in range(0,width,step):
-                my_block = (i,j,i+step,j+step)
-                my_pixel = color_pixel(my_block, my_img, factor)
-                draw.rectangle(my_block, fill = my_pixel)
-    
-    elif option == 2:
-        for i in range(0,height,step): # row by row        
-            factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-            for j in range(0,width,step):
-                my_block = (i,j,i+step,j+step)
-                my_pixel = color_pixel(my_block, my_img, factor)
-                draw.rectangle(my_block, fill = my_pixel)
-                             
-    elif option == 3:
-        for j in range(0,width,step): # column by column
-            factor = [random.randrange(255),random.randrange(255),random.randrange(255)]
-            for i in range(0,height,step):
-                my_block = (i,j,i+step,j+step)
-                my_pixel = color_pixel(my_block, my_img, factor)
-                draw.rectangle(my_block, fill = my_pixel)
-                
-    del draw
+    transformations = ['full','circle','ring','square','couteau','bande','gradient squares']
 
-# ================================================================================
-def pixellize_multi(img,option=0):
-    width = img.size[0]
-    height = img.size[1]
-    factor = fgcd(width,height)
-    
-    new_width = width * len(factor)
-    new_height = height
-    new_img = Image.new('RGB', (new_width, new_height))
-    
-    i = 0
-    
-    for step in factor:
-        new_box = (i*width,0)
-        new_img.paste(pixellize(img,step,option),new_box)
-        i +=1
-        
-    return new_img
+    # ================================================================================
+    def __init__(self, imageloc):
+        self.image = Image.open(imageloc)
+        self.size = self.image.size
+        #self.mask = maskname
+        #maskoptions = maskoptions # center, corners, orientation, etc
+        #self.pixelzone = pixelzone #inside or outside
+        #self.coloropion = coloroption #refer to color_pixel
+        #self.basecolor = basecolor
+
+    # ================================================================================
+    def __getattr__(self, item):
+        print("I don't know this {}".format(item))
 
 
-# ================================================================================
-def choose_factor(a,b):
-    ## Ask user to provide a pixellization factor
-    list_factor = fgcd(a,b)
-    while len(list_factor) < 2:
-        a -= 1
-        list_factor = fgcd(a,b)
-        
-    factor_in = False
-    
-    while not factor_in:
-        print('Veuillez choisir la taille de votre pixel : ', str(list_factor))
-        try:
-            factor = int(input())
-            factor_in = (factor in list_factor)
-            if not factor_in:
-                print("cette valeur n'est pas dans la liste")
-        except ValueError:
-            print("Ceci n'est pas une entrée valide")
-        pass          
-    
-    return factor
-        
+    # ================================================================================
+    def pixellize(self, maskname, mask_options, zone = 'in', color_option = 0, color = [0,0,0]):
+        new_img = self.image.copy()
 
-#================================================================================
-def inputint(text, list_choice = None):
-    test = False
-    
-    while not test:
-        if list_choice:
-            print(text,str(list_choice))
-            try:
-                ma_valeur = int(input())
-                test = (ma_valeur in list_choice)
-                if not test:
-                    print("cette valeur n'est pas dans la liste")
-            except ValueError:
-                print("Ceci n'est pas une entrée valide")
-            pass
+        # return the list of big pixels
+        if maskname == 'circle':
+            maskarea = pixelcircle(self, mask_options, zone)
+        elif maskname == 'ring':
+            maskarea = pixelring(self, mask_options, zone)
+        elif maskname == 'square':
+            maskarea = pixelsquare(self, mask_options, zone)
+        elif maskname == 'bande':
+            maskarea = pixelstripe(self, mask_options, zone)
+        elif maskname == 'gradient squares':
+            maskarea = pixelgradsquares(self, mask_options)
+        elif maskname == 'couteau':
+            maskarea = pixelcouteau(self, mask_options)
+        elif maskname == 'full':
+            maskarea = pixelfull(self, mask_options['step'])
         else:
-            print(text)
-            try:
-                ma_valeur = int(input())
-                test = True
-            except ValueError:
-                print("Ceci n'est pas une entrée valide")
-            pass
+            maskarea = pixelfull(self, mask_options['step'])
+
+
+        if color_option not in [0,1,2,3,4]:
+            option = 0 # while waiting for a proper error handling
+        else:
+            option = color_option
+
+        new_img = colors_in_range(new_img, maskarea, maskname, option, color)
+
+        return new_img
+
+    # ================================================================================
+    def pixellize_multi(self, maskname, mask_options, zone = 'in', color_option = 0, color = [0,0,0]):
+        width = self.size[0]
+        height = self.size[1]
+        factor = fgcd(width, height) #factor lis should be in input
         
-    return ma_valeur
+        new_width = width * len(factor)
+        new_height = height
+        new_img = Image.new('RGB', (new_width, new_height))
+        
+        i = 0
+        
+        for step in factor:
+            new_box = (i*width, 0)
+            new_img.paste(self.pixellize(step, maskname, mask_options, zone, color_option, color), new_box)
+            i += 1
+            
+        return new_img
+    
