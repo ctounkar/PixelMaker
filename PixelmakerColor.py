@@ -24,7 +24,7 @@ def color_picker(basecolor = None, factor = 0.5, ncolor = 1):
             my_color = []
             my_color.append(basecolor)
             for i in range(ncolor):
-                acolor = []
+                acolor = [0,0,0]
                 acolor[0] = floor(factor*basecolor[0] + (1-factor)*random.randrange(255))
                 acolor[1] = floor(factor*basecolor[1] + (1-factor)*random.randrange(255))
                 acolor[2] = floor(factor*basecolor[2] + (1-factor)*random.randrange(255))
@@ -64,55 +64,72 @@ def color_average(square, img, color = None, solid = False):
     return new_pxl_r, new_pxl_g, new_pxl_b
 
 # ================================================================================
-def colors_in_range(img, zone, maskname, option = 0, color = None, factor = 0.9, ncolor = 9):
-    draw = ImageDraw.Draw(img)
+def colors_in_range(img, zone, maskname, option = 0, base_color = None, factor = 0.9, ncolor = 9):
+    '''
+    color options
+        0: pixelization without any color modification
+        1: 1 color for all zone
+        2: 1 color by vertical strip
+        3: 1 color by horizontal strip
+        4: 1 random color by pixel
+
+    factor: factor of colorization
+    ncolor: number of different shades of color
+    '''
+    colored_area = {}
 
     if maskname == 'gradient square':
         for upelt in zone:
             for elt in upelt:
-                if option == 0: # pixellization without any color modification
-                    my_pixel = color_average((elt[0][0],elt[0][1],elt[1][0],elt[1][1]), img)
-                else: # 1 color for all zone whatever the value of options
-                    my_pixel = color_average((elt[0][0],elt[0][1],elt[1][0],elt[1][1]), img, color)
+                if option == 0:
+                    # pixelization without any color modification
+                    my_pixel = color_average((elt[0],elt[1],elt[2],elt[3]), img)
+                else:
+                    # 1 color for all zone whatever the value of options
+                    my_pixel = color_average((elt[0],elt[1],elt[2],elt[3]), img, base_color)
 
-                draw.rectangle(elt, fill = my_pixel)
+                colored_area[elt] = my_pixel
+
 
     else:
-        if option == 0: # pixellization without any color modification
+        if option == 0:
+            # pixelization without any color modification
             for elt in zone:
-                my_pixel = color_average((elt[0][0],elt[0][1],elt[1][0],elt[1][1]), img)
-                draw.rectangle(elt, fill = my_pixel)
+                my_pixel = color_average((elt[0],elt[1],elt[2],elt[3]), img)
+                colored_area[elt] = my_pixel
 
-        elif option == 1: # 1 color for all zone
+        elif option == 1:
+            # 1 color for all zone
             for elt in zone:
-                my_pixel = color_average((elt[0][0],elt[0][1],elt[1][0],elt[1][1]), img, color)
-                draw.rectangle(elt, fill = my_pixel)
+                my_pixel = color_average((elt[0],elt[1],elt[2],elt[3]), img, base_color)
+                colored_area[elt] = my_pixel
 
         else:
             my_pixels = {} #list of colors, indexed by row or column
-            my_colors = color_picker(color, factor, ncolor)
+            my_colors = color_picker(base_color, factor, ncolor)
 
             for elt in zone:
-                if option == 2: #1 color by vertical strip
-                    if elt[0][0] in my_pixels.keys():
-                        color = my_pixels[elt[0][0]]
+                if option == 2:
+                    #1 color by vertical strip
+                    if elt[0] in my_pixels.keys():
+                        color = my_pixels[elt[0]]
                     else:
                         color = random.choice(my_colors)
-                        my_pixels[elt[0][0]] = color # add element to the dict, indexed by column
+                        my_pixels[elt[0]] = color # add element to the dict, indexed by column
 
-                elif option == 3: #1 color by horizontal strip
-                    if elt[0][1] in my_pixels.keys():
-                        color = my_pixels[elt[0][1]]
+                elif option == 3:
+                    #1 color by horizontal strip
+                    if elt[1] in my_pixels.keys():
+                        color = my_pixels[elt[1]]
                     else:
                         color = random.choice(my_colors)
-                        my_pixels[elt[0][1]] = color # add element to the dict, indexed by row
+                        my_pixels[elt[1]] = color # add element to the dict, indexed by row
 
-                elif option == 4: #1 random color by pixel
+                elif option == 4:
+                    #1 random color by pixel
                     color = random.choice(my_colors)
 
-                my_pixel = color_average((elt[0][0],elt[0][1],elt[1][0],elt[1][1]),img,color)
-                draw.rectangle(elt, fill = my_pixel)
+                my_pixel = color_average((elt[0],elt[1],elt[2],elt[3]),img,color)
+                colored_area[elt] = my_pixel
 
-    del draw
-
-    return img
+    return colored_area

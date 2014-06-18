@@ -14,7 +14,7 @@ def pixelfull(my_img, my_step):
             topy = max(0, j * my_step)
             botx = min(my_img.size[0], (i + 1) * my_step)
             boty = min(my_img.size[1], (j + 1) * my_step)
-            my_block = [(topx, topy), (botx, boty)]
+            my_block = (topx, topy, botx, boty)
             my_area.append(my_block)
 
     return my_area
@@ -36,7 +36,7 @@ def pixelcircle(my_img, mask_options, pixelzone):
                 topy = max(0, j * my_step)
                 botx = min(my_img.size[0], (i + 1) * my_step)
                 boty = min(my_img.size[1], (j + 1) * my_step)
-                my_block = [(topx, topy), (botx, boty)]
+                my_block = (topx, topy, botx, boty)
                 my_area.append(my_block)
 
             elif pixelzone == 'out' and not circle_range(((i + 1 / 2) * my_step, (j + 1 / 2) * my_step),
@@ -45,7 +45,7 @@ def pixelcircle(my_img, mask_options, pixelzone):
                 topy = max(0, j * my_step)
                 botx = min(my_img.size[0], (i + 1) * my_step)
                 boty = min(my_img.size[1], (j + 1) * my_step)
-                my_block = [(topx, topy), (botx, boty)]
+                my_block = (topx, topy, botx, boty)
                 my_area.append(my_block)
 
     return my_area
@@ -72,7 +72,7 @@ def pixelring(my_img, mask_options, pixelzone):
                 topy = max(0, j * my_step)
                 botx = min(my_img.size[0], (i + 1) * my_step)
                 boty = min(my_img.size[1], (j + 1) * my_step)
-                my_block = [(topx, topy), (botx, boty)]
+                my_block = (topx, topy, botx, boty)
                 my_area.append(my_block)
                 my_area.append(my_block)
 
@@ -81,7 +81,7 @@ def pixelring(my_img, mask_options, pixelzone):
                 topy = max(0, j * my_step)
                 botx = min(my_img.size[0], (i + 1) * my_step)
                 boty = min(my_img.size[1], (j + 1) * my_step)
-                my_block = [(topx, topy), (botx, boty)]
+                my_block = (topx, topy, botx, boty)
                 my_area.append(my_block)
                 my_area.append(my_block)
 
@@ -107,7 +107,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
             elif pixelzone == 'out' and (j * my_step <= mask_options['start'] or j * my_step >= (
@@ -117,7 +117,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
     elif mask_options['orientation'] == 90:
@@ -130,7 +130,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
             elif pixelzone == 'out' and (i * my_step <= mask_options['start'] or i * my_step >= (
@@ -140,7 +140,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
 
@@ -154,7 +154,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
                 elif pixelzone == 'out' and not between_bars((i * my_step, j * my_step), mask_options['start'],
@@ -164,7 +164,7 @@ def pixelstripe(my_img, mask_options, pixelzone):
                     topy = j * my_step
                     botx = (i + 1) * my_step
                     boty = (j + 1) * my_step
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
     return my_area
@@ -188,7 +188,7 @@ def pixelcouteau(my_img, mask_options):
                 topy = j * my_step
                 botx = (i + 1) * my_step
                 boty = (j + 1) * my_step
-                my_block = [(topx, topy), (botx, boty)]
+                my_block = (topx, topy, botx, boty)
                 my_area.append(my_block)
 
     return my_area
@@ -210,7 +210,7 @@ def pixelsquare(my_img, mask_options, pixelzone):
                     topy = max(0, j * my_step)
                     botx = min(my_img.size[0], (i + 1) * my_step)
                     boty = min(my_img.size[1], (j + 1) * my_step)
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
                 elif pixelzone == 'out' and not square_range((i * my_step, j * my_step), mask_options['corners']):
@@ -218,7 +218,7 @@ def pixelsquare(my_img, mask_options, pixelzone):
                     topy = max(0, j * my_step)
                     botx = min(my_img.size[0], (i + 1) * my_step)
                     boty = min(my_img.size[1], (j + 1) * my_step)
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_area.append(my_block)
 
     return my_area
@@ -250,14 +250,14 @@ def pixelgradsquares(my_img, mask_options):
             yend = mask_options['corners'][3]
 
             my_zone = [xstart, ystart, xend, yend]
-            print(my_zone)
+            #print(my_zone)
             for i in range(0, xstep, 1):
                 for j in range(0, ystep, 1):
                     topx = max(0, xstart + i * my_step[k])
                     topy = max(0, ystart + j * my_step[k])
                     botx = min(my_img.size[0], xstart + (i + 1) * my_step[k])
                     boty = min(my_img.size[1], ystart + (j + 1) * my_step[k])
-                    my_block = [(topx, topy), (botx, boty)]
+                    my_block = (topx, topy, botx, boty)
                     my_subarea.append(my_block)
 
             my_area.append(my_subarea)
